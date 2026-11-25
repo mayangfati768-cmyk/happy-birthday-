@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You, Sayangku!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Patrick+Hand&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-ocean: #091d3a;
+            --mid-ocean: #163c6e;
+            --light-sky: #88c6ff;
+            --pale-foam: #dff2ff;
+            --text-white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background:
+                radial-gradient(circle at 20% 10%, rgba(168, 224, 255, 0.45), transparent 42%),
+                radial-gradient(circle at 82% 18%, rgba(120, 178, 255, 0.32), transparent 48%),
+                radial-gradient(circle at 50% 85%, rgba(20, 72, 138, 0.55), transparent 60%),
+                linear-gradient(175deg, #7ec2ff 0%, #2c67ad 38%, #112d54 78%, #07162b 100%);
+            color: var(--text-white);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .stars-layer, .burst-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .stars-layer { z-index: 0; }
+        .burst-layer { z-index: 2500; }
+
+        .ocean-spark-bg {
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 50% 100%, rgba(122, 206, 255, 0.25), transparent 65%),
+                radial-gradient(circle at 15% 45%, rgba(255, 255, 255, 0.14), transparent 35%);
+            pointer-events: none;
+            z-index: 0;
+            animation: waveFloat 7s ease-in-out infinite;
+        }
+
+        .bg-star {
+            position: absolute;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(215, 242, 255, 0.95);
+            animation: twinkle var(--dur, 4s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+        }
+
+        .spark-glyph {
+            position: absolute;
+            font-size: var(--ssize, 16px);
+            color: #fff6c2;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.85));
+            animation: sparkleGlyph var(--sdur, 3.6s) ease-in-out infinite;
+            animation-delay: var(--sdelay, 0s);
+        }
+
+        /* ================= HALAMAN TERPISAH FULLSCREEN ================= */
+        .page-screen {
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 22% 14%, rgba(178, 228, 255, 0.42), transparent 44%),
+                radial-gradient(circle at 80% 24%, rgba(92, 158, 235, 0.34), transparent 50%),
+                linear-gradient(170deg, #74baff 0%, #265ea3 45%, #0d2445 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            overflow-y: auto;
+            transition: opacity 0.55s ease, visibility 0.55s ease, transform 0.55s ease;
+        }
+
+        .page-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: scale(1.03);
+        }
+
+        #passcode-screen { z-index: 1009; }
+        #gift-screen     { z-index: 1008; }
+        #greeting-screen { z-index: 1007; }
+        #envelope-screen { z-index: 1006; }
+        #calendar-screen { z-index: 1005; }
+        #cake-screen     { z-index: 1004; }
+        #photo-screen    { z-index: 1003; }
+        #message-screen  { z-index: 1002; justify-content: flex-start; padding-top: 46px; padding-bottom: 64px; }
+        #bottle-screen   { z-index: 1001; }
+
+        .glam-crown-row {
+            font-size: 1.2rem;
+            letter-spacing: 6px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 2px 8px rgba(255, 255, 255, 0.7));
+        }
+
+        /* 1. PASSWORD */
+        .pass-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 344px;
+            background: rgba(13, 38, 74, 0.56);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1.5px solid rgba(214, 238, 255, 0.55);
+            border-radius: 30px;
+            padding: 22px 18px 20px;
+            box-shadow: 0 22px 48px rgba(4, 16, 36, 0.5);
+        }
+
+        .pass-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2.9rem;
+            line-height: 1.08;
+            margin-bottom: 4px;
+            text-shadow: 0 4px 16px rgba(255, 255, 255, 0.45);
+        }
+
+        .pass-subtitle {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #e8f4ff;
+            margin-bottom: 14px;
+        }
+
+        .pass-display {
+            background: rgba(7, 22, 46, 0.72);
+            border: 1.5px solid rgba(196, 228, 255, 0.5);
+            border-radius: 16px;
+            padding: 9px 18px;
+            width: 100%;
+            max-width: 232px;
+            min-height: 44px;
+            margin: 0 auto 6px;
+            font-size: 1.15rem;
+            letter-spacing: 3.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pass-display.shake {
+            animation: shake 0.4s ease;
+            border-color: #ff758f;
+        }
+
+        .pass-error {
+            height: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #ffd6e0;
+            margin-bottom: 8px;
+        }
+
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 68px);
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .key-btn {
+            height: 50px;
+            border-radius: 15px;
+            border: 1.5px solid rgba(220, 242, 255, 0.55);
+            background: linear-gradient(145deg, rgba(145, 204, 255, 0.42), rgba(24, 64, 118, 0.72));
+            color: #ffffff;
+            font-size: 1.18rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(5, 20, 44, 0.35);
+            transition: transform 0.12s ease, background 0.2s ease;
+        }
+
+        .key-btn:active {
+            transform: scale(0.92);
+        }
+
+        .pass-hint {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.08rem;
+            color: #e6f4ff;
+        }
+
+        /* 2. KOTAK KADO & BUNGA */
+        .stage-instruction {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.48rem;
+            line-height: 1.3;
+            margin-bottom: 28px;
+            text-shadow: 0 2px 12px rgba(5, 20, 44, 0.45);
+            animation: pulse 1.8s infinite;
+        }
+
+        .gift-box-wrapper {
+            position: relative;
+            width: 170px;
+            height: 170px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            animation: float 2.8s ease-in-out infinite;
+        }
+
+        .gift-lid {
+            width: 184px;
+            height: 42px;
+            background: linear-gradient(135deg, #cbe8ff, #6aaae8);
+            border-radius: 10px;
+            position: relative;
+            z-index: 3;
+            box-shadow: 0 6px 15px rgba(5, 20, 44, 0.4);
+            transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+            border: 1.5px solid rgba(255, 255, 255, 0.85);
+        }
+
+        .gift-lid::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 26px;
+            transform: translateX(-50%);
+            background: #f5d061;
+        }
+
+        .gift-bow {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.3rem;
+        }
+
+        .gift-base {
+            width: 162px;
+            height: 118px;
+            background: linear-gradient(180deg, #5ba0e3, #1e4b82);
+            border-bottom-left-radius: 14px;
+            border-bottom-right-radius: 14px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 18px 35px rgba(5, 20, 44, 0.5);
+            border: 1.5px solid rgba(220, 242, 255, 0.6);
+        }
+
+        .gift-base::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 26px;
+            transform: translateX(-50%);
+            background: #f5d061;
+        }
+
+        .gift-box-wrapper.opened .gift-lid {
+            transform: translateY(-75px) rotate(-18deg);
+            opacity: 0;
+        }
+
+        .burst-particle {
+            position: absolute;
+            font-size: var(--psize, 28px);
+            user-select: none;
+            animation: particleFly var(--pdur, 2.4s) cubic-bezier(0.16, 0.85, 0.35, 1) forwards;
+        }
+
+        /* 3. UCAPAN (TAP LANGSUNG KE AMPLOP) */
+        .greeting-tap-area {
+            cursor: pointer;
+            padding: 16px;
+        }
+
+        .big-greeting {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.65rem;
+            line-height: 1.15;
+            margin-bottom: 14px;
+            text-shadow: 0 4px 20px rgba(255, 255, 255, 0.65);
+            animation: popIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards, softGlow 3s ease-in-out infinite;
+        }
+
+        .greeting-sub {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.32rem;
+            color: #fff6c2;
+            animation: pulse 1.8s infinite;
+        }
+
+        .glam-btn {
+            background: linear-gradient(135deg, #ffffff, #d9efff);
+            color: #10325c;
+            border: 1.5px solid rgba(255, 255, 255, 0.95);
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(5, 20, 44, 0.35);
+            transition: transform 0.2s ease;
+        }
+
+        .glam-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .glam-btn-outline {
+            background: rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            border: 1.5px solid rgba(220, 242, 255, 0.78);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .glam-btn-outline:hover {
+            background: rgba(255, 255, 255, 0.28);
+            transform: scale(1.04);
+        }
+
+        /* 4. AMPLOP */
+        .script-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.45rem;
+            line-height: 1.1;
+            margin-bottom: 32px;
+            text-shadow: 0 4px 18px rgba(5, 20, 44, 0.4);
+            animation: softGlow 3.2s ease-in-out infinite;
+        }
+
+        .envelope-wrapper {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .envelope-wrapper:hover {
+            transform: scale(1.06);
+        }
+
+        .envelope {
+            width: 220px;
+            height: 145px;
+            background: #2c68b0;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 18px 35px rgba(5, 20, 44, 0.45);
+            overflow: hidden;
+            border: 1.5px solid rgba(224, 244, 255, 0.8);
+        }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-left: 110px solid transparent;
+            border-right: 110px solid transparent;
+            border-top: 82px solid #7ec0ff;
+            z-index: 2;
+        }
+
+        .envelope::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-left: 110px solid #4887cf;
+            border-right: 110px solid #4887cf;
+            border-bottom: 72px solid #1e4d87;
+            z-index: 1;
+        }
+
+        .wax-seal {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ffffff, #cde8ff);
+            border-radius: 50%;
+            position: absolute;
+            top: 58px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            border: 2px solid #f5d061;
+        }
+
+        .tap-text {
+            margin-top: 28px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.4rem;
+            animation: pulse 1.8s infinite;
+        }
+
+        /* 5. HALAMAN KALENDER SOBEK TERPISAH */
+        .tear-calendar-stage {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            min-height: 315px;
+            margin: 0 auto 18px;
+        }
+
+        .tear-page {
+            background: linear-gradient(165deg, rgba(136, 198, 255, 0.34), rgba(16, 45, 86, 0.86));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 24px 18px 20px;
+            position: relative;
+            box-shadow: 0 18px 36px rgba(4, 16, 36, 0.45);
+            border: 1.5px solid rgba(218, 240, 255, 0.6);
+            transition: transform 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97), opacity 0.34s ease;
+            transform-origin: top center;
+        }
+
+        .tear-page.ripping {
+            transform: translateX(135px) translateY(38px) rotate(24deg) skewX(8deg);
+            opacity: 0;
+        }
+
+        .tear-top-holes {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 8px;
+        }
+
+        .tear-hole {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(8, 24, 48, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+        }
+
+        .month-title {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.1rem;
+            line-height: 1.05;
+            margin-bottom: 10px;
+            text-shadow: 0 3px 12px rgba(5, 20, 44, 0.45);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px 4px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.08rem;
+        }
+
+        .day-name {
+            font-weight: bold;
+            color: #fff6c2;
+        }
+
+        .date-cell {
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .special-date {
+            color: #0b2545;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .special-date::before {
+            content: '🤍';
+            position: absolute;
+            font-size: 30px;
+            z-index: -1;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        /* 6. HALAMAN KUE ULTAH TERPISAH */
+        .cake-stage-box {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .candle-unit {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: -4px;
+            z-index: 3;
+        }
+
+        .flame {
+            width: 18px;
+            height: 28px;
+            background: radial-gradient(circle at 50% 75%, #fff9c4 0%, #ffd166 55%, #ff8c42 100%);
+            border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+            box-shadow: 0 0 18px #ffd166, 0 0 35px rgba(255, 255, 255, 0.85);
+            animation: flicker 0.9s ease-in-out infinite alternate;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .flame.out {
+            opacity: 0;
+            transform: scale(0.1) translateY(-10px);
+        }
+
+        .smoke {
+            font-size: 1.4rem;
+            opacity: 0;
+            margin-bottom: -18px;
+            transition: opacity 0.3s ease, transform 1s ease;
+        }
+
+        .smoke.rising {
+            opacity: 0.85;
+            transform: translateY(-28px);
+        }
+
+        .candle-stick {
+            width: 14px;
+            height: 46px;
+            background: repeating-linear-gradient(45deg, #ffffff 0, #ffffff 6px, #f5d061 6px, #f5d061 12px);
+            border-radius: 4px;
+        }
+
+        .cake-top-tier {
+            width: 140px;
+            height: 52px;
+            background: linear-gradient(180deg, #ffffff, #d9eeff);
+            border-radius: 14px 14px 6px 6px;
+            z-index: 2;
+        }
+
+        .cake-bottom-tier {
+            width: 196px;
+            height: 66px;
+            background: linear-gradient(180deg, #8ec8ff, #5496db);
+            border-radius: 14px 14px 18px 18px;
+            z-index: 1;
+        }
+
+        .cake-plate {
+            width: 235px;
+            height: 14px;
+            background: #ffffff;
+            border-radius: 50px;
+            margin-top: 2px;
+        }
+
+        /* 7. HALAMAN FOTO & MUSIK TERPISAH */
+        .photo-page-box {
+            width: 100%;
+            max-width: 370px;
+            background: rgba(16, 45, 86, 0.56);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(220, 242, 255, 0.65);
+            border-radius: 26px;
+            padding: 20px 16px 22px;
+            box-shadow: 0 18px 38px rgba(4, 16, 36, 0.45);
+        }
+
+        .photo-glam-stickers {
+            font-size: 1.3rem;
+            letter-spacing: 6px;
+            margin-bottom: 10px;
+        }
+
+        .camera-body {
+            background: linear-gradient(145deg, #87c6ff, #275fa3);
+            border-radius: 22px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 14px 28px rgba(5, 20, 44, 0.42);
+            border: 2px solid rgba(255, 255, 255, 0.78);
+            margin-bottom: 14px;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .camera-body.surprise-active {
+            transform: scale(1.03);
+            box-shadow: 0 0 28px rgba(255, 246, 194, 0.85), 0 16px 32px rgba(5, 20, 44, 0.5);
+        }
+
+        .camera-screen {
+            width: 65%;
+            aspect-ratio: 4 / 3;
+            background: #081930;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid #ffffff;
+        }
+
+        .camera-screen img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-controls {
+            width: 32%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .camera-dial {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffffff, #99cfff);
+            border: 3px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #11345e;
+        }
+
+        .surprise-caption {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.22rem;
+            color: #fff6c2;
+            min-height: 28px;
+            margin-bottom: 10px;
+        }
+
+        .photo-btn-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .spotify-card {
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 12px 26px rgba(5, 20, 44, 0.35);
+            text-align: left;
+            border: 1.5px solid rgba(220, 242, 255, 0.65);
+            margin-top: 14px;
+        }
+
+        .vinyl-cover {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ffffff, #cde8ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .vinyl-cover.spinning {
+            animation: spinDisc 5s linear infinite;
+        }
+
+        .song-info {
+            flex: 1;
+        }
+
+        .song-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #ffffff;
+            color: #123661;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* 8. HALAMAN UCAPAN (GESER KE BAWAH -> BOTOL) */
+        .message-wrap {
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        .spiral-paper {
+            background: #fdfeff;
+            color: #14365e;
+            border-radius: 14px;
+            padding: 32px 20px 24px;
+            position: relative;
+            margin-top: 16px;
+            box-shadow: 0 14px 30px rgba(4, 16, 36, 0.42);
+            border: 1.5px solid #ffffff;
+            font-size: 0.92rem;
+            line-height: 1.72;
+        }
+
+        .spiral-rings {
+            position: absolute;
+            top: -12px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-evenly;
+            padding: 0 15px;
+        }
+
+        .ring {
+            width: 12px;
+            height: 22px;
+            border: 3px solid #2b67b0;
+            border-radius: 10px;
+        }
+
+        .swipe-down-note {
+            margin-top: 22px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.25rem;
+            color: #fff6c2;
+            animation: float 2.2s ease-in-out infinite;
+        }
+
+        .sticker-row {
+            display: flex;
+            justify-content: space-around;
+            font-size: 2.2rem;
+            margin: 18px 0 14px;
+        }
+
+        .sticker-row span {
+            animation: float 3.2s ease-in-out infinite;
+        }
+        .sticker-row span:nth-child(2) { animation-delay: 0.7s; }
+        .sticker-row span:nth-child(3) { animation-delay: 1.4s; }
+
+        /* 9. HALAMAN BOTOL KACA TERPISAH */
+        .hope-bottle-stage {
+            width: 100%;
+            max-width: 360px;
+            background: rgba(15, 42, 82, 0.58);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(220, 242, 255, 0.65);
+            border-radius: 28px;
+            padding: 28px 18px 26px;
+            box-shadow: 0 18px 38px rgba(4, 16, 36, 0.45);
+        }
+
+        .glass-bottle-wrap {
+            position: relative;
+            width: 132px;
+            height: 194px;
+            margin: 0 auto 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: float 3.2s ease-in-out infinite;
+            transition: transform 0.2s ease;
+        }
+
+        .glass-bottle-wrap:hover {
+            transform: scale(1.05);
+        }
+
+        .glass-bottle-wrap:active {
+            transform: scale(0.95);
+        }
+
+        .bottle-cork {
+            width: 46px;
+            height: 24px;
+            background: linear-gradient(180deg, #e5b786, #b6814e);
+            border-radius: 6px 6px 3px 3px;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            z-index: 3;
+        }
+
+        .bottle-neck {
+            width: 50px;
+            height: 24px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.55), rgba(190,230,255,0.22), rgba(255,255,255,0.62));
+            border-left: 1px solid rgba(255,255,255,0.7);
+            border-right: 1px solid rgba(255,255,255,0.7);
+            z-index: 2;
+        }
+
+        .bottle-body {
+            width: 126px;
+            height: 146px;
+            margin-top: -2px;
+            border-radius: 28px 28px 36px 36px;
+            background: linear-gradient(125deg, rgba(255,255,255,0.48), rgba(145,212,255,0.18) 50%, rgba(255,255,255,0.42));
+            border: 1.5px solid rgba(255,255,255,0.82);
+            box-shadow: inset 0 0 22px rgba(255,255,255,0.45), 0 14px 28px rgba(4,16,36,0.45);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bottle-star-cluster {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .bottle-star-item {
+            position: absolute;
+            font-size: var(--bsize, 16px);
+            top: var(--btop, 50%);
+            left: var(--bleft, 50%);
+            filter: drop-shadow(0 0 6px rgba(255, 250, 195, 0.95));
+            animation: twinkle var(--bdur, 2.5s) ease-in-out infinite;
+            animation-delay: var(--bdelay, 0s);
+        }
+
+        .bottle-tap-hint {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: #fff6c2;
+            animation: pulse 1.8s infinite;
+        }
+
+        .hope-popup-card {
+            display: none;
+            margin-top: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255, 255, 255, 0.75);
+            border-radius: 20px;
+            padding: 16px;
+            animation: popIn 0.45s ease forwards;
+        }
+
+        .hope-popup-card.revealed {
+            display: block;
+        }
+
+        .hope-quote-label {
+            font-size: 0.74rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fff6c2;
+            margin-bottom: 6px;
+        }
+
+        .hope-quote-text {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.3rem;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .hope-popup-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-9px); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.35; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.25); }
+        }
+        @keyframes sparkleGlyph {
+            0%, 100% { opacity: 0.35; transform: scale(0.85) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(18deg); }
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.14); }
+        }
+        @keyframes spinDisc {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes softGlow {
+            0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4)); }
+            50% { filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.85)); }
+        }
+        @keyframes waveFloat {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(16px); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        @keyframes flicker {
+            0% { transform: scale(1) rotate(-2deg); }
+            100% { transform: scale(1.08) rotate(3deg); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.78) translateY(8px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes particleFly {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0.45) rotate(0deg);
+            }
+            75% { opacity: 1; }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx, 0px), var(--ty, -240px)) scale(1.25) rotate(var(--rot, 360deg));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars-layer" id="stars-layer"></div>
+    <div class="ocean-spark-bg"></div>
+    <div class="burst-layer" id="burst-layer"></div>
+
+    <audio id="bg-music" loop>
+        <source src="WhatsApp Audio 2026-11-25 at 09.57.19.mpeg" type="audio/mpeg">
+    </audio>
+
+    <!-- 1. PASSWORD -->
+    <div class="page-screen" id="passcode-screen">
+        <div class="pass-card">
+            <div class="glam-crown-row">👑 ✨ 🐚</div>
+            <h1 class="pass-title">For You, Sayang</h1>
+            <p class="pass-subtitle">Enter the secret code</p>
+
+            <div class="pass-display" id="pass-display">••••••••••</div>
+            <div class="pass-error" id="pass-error"></div>
+
+            <div class="keypad-grid">
+                <button class="key-btn" type="button" onclick="pressKey('1')">1</button>
+                <button class="key-btn" type="button" onclick="pressKey('2')">2</button>
+                <button class="key-btn" type="button" onclick="pressKey('3')">3</button>
+                <button class="key-btn" type="button" onclick="pressKey('4')">4</button>
+                <button class="key-btn" type="button" onclick="pressKey('5')">5</button>
+                <button class="key-btn" type="button" onclick="pressKey('6')">6</button>
+                <button class="key-btn" type="button" onclick="pressKey('7')">7</button>
+                <button class="key-btn" type="button" onclick="pressKey('8')">8</button>
+                <button class="key-btn" type="button" onclick="pressKey('9')">9</button>
+                <button class="key-btn" type="button" onclick="pressKey('-')">-</button>
+                <button class="key-btn" type="button" onclick="pressKey('0')">0</button>
+                <button class="key-btn" type="button" onclick="deleteKey()">⌫</button>
+            </div>
+
+            <p class="pass-hint">Hint: Tanggal lahirmu (DD-MM-YYYY) 💎</p>
+        </div>
+    </div>
+
+    <!-- 2. KOTAK KADO & BUNGA -->
+    <div class="page-screen" id="gift-screen">
+        <div class="glam-crown-row">✨ 🦋 💎</div>
+        <p class="stage-instruction" id="gift-instruction">Tap kotak kadonya untuk membuka 🎁✨</p>
+        <div class="gift-box-wrapper" id="gift-box" onclick="openGiftBox()">
+            <div class="gift-lid"><span class="gift-bow">👑</span></div>
+            <div class="gift-base"></div>
+        </div>
+    </div>
+
+    <!-- 3. UCAPAN (TAP LANGSUNG KE AMPLOP) -->
+    <div class="page-screen" id="greeting-screen">
+        <div class="greeting-tap-area" onclick="goToEnvelope()">
+            <div class="glam-crown-row">👑 ✨ 🌊 💎</div>
+            <h1 class="big-greeting">Happy Birthday<br>Sayangkuuu! 🎉</h1>
+            <p class="greeting-sub">Tap di mana saja ✨</p>
+        </div>
+    </div>
+
+    <!-- 4. AMPLOP -->
+    <div class="page-screen" id="envelope-screen">
+        <div class="glam-crown-row">👑 ✨ 🐚</div>
+        <h1 class="script-title">Happy Birthday<br>Sayang!</h1>
+        <div class="envelope-wrapper" onclick="openCalendarPage()">
+            <div class="envelope">
+                <div class="wax-seal">💎</div>
+            </div>
+        </div>
+        <p class="tap-text">Tap to open</p>
+    </div>
+
+    <!-- 5. HALAMAN KALENDER SOBEK TERPISAH -->
+    <div class="page-screen" id="calendar-screen">
+        <div class="glam-crown-row">✨ 🐚 💎</div>
+        <div class="tear-calendar-stage">
+            <div class="tear-page" id="tear-page">
+                <div class="tear-top-holes">
+                    <span class="tear-hole"></span><span class="tear-hole"></span><span class="tear-hole"></span>
+                    <span class="tear-hole"></span><span class="tear-hole"></span><span class="tear-hole"></span>
+                </div>
+                <h2 class="month-title" id="tear-month-name">January</h2>
+                <div class="calendar-grid" id="tear-calendar-grid"></div>
+            </div>
+        </div>
+        <button class="glam-btn" id="to-cake-btn" type="button" onclick="goToCakePage()" style="display:none;">Lanjut 🎂</button>
+    </div>
+
+    <!-- 6. HALAMAN KUE ULTAH TERPISAH -->
+    <div class="page-screen" id="cake-screen">
+        <div class="glam-crown-row">👑 ✨ 💎</div>
+        <p class="stage-instruction" id="cake-instruction">Make a wish & tap lilinnya 🕯️✨</p>
+        <div class="cake-stage-box" onclick="blowCakeCandle()">
+            <div class="candle-unit">
+                <div class="smoke" id="cake-smoke">💨</div>
+                <div class="flame" id="cake-flame"></div>
+                <div class="candle-stick"></div>
+            </div>
+            <div class="cake-top-tier"></div>
+            <div class="cake-bottom-tier"></div>
+            <div class="cake-plate"></div>
+        </div>
+    </div>
+
+    <!-- 7. HALAMAN FOTO & MUSIK TERPISAH -->
+    <div class="page-screen" id="photo-screen">
+        <div class="photo-page-box">
+            <div class="photo-glam-stickers">👑 🎉 ✨ 🦋 🐚 💎</div>
+
+            <div class="camera-body" id="camera-frame-box">
+                <div class="camera-screen">
+                    <img src="WhatsApp Image 2026-11-25 at 09.57.36.jpeg" alt="Foto Pacar">
+                </div>
+                <div class="camera-controls">
+                    <div style="font-size: 10px; color: #ffffff; font-weight: 600;">CANON IXUS</div>
+                    <div class="camera-dial">FUNC<br>SET</div>
+                </div>
+            </div>
+
+            <p class="surprise-caption" id="surprise-caption"></p>
+            <div class="photo-btn-row">
+                <button class="glam-btn" type="button" onclick="triggerPhotoSurprise()">Surprise 🎉✨</button>
+                <button class="glam-btn-outline" type="button" onclick="goToMessagePage()">Lanjut 💌</button>
+            </div>
+
+            <div class="spotify-card">
+                <div class="vinyl-cover" id="vinyl-cover">💿</div>
+                <div class="song-info">
+                    <div class="song-title">Special Song For You</div>
+                </div>
+                <button class="play-btn" type="button" id="play-pause-btn" onclick="toggleMusic()">▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. HALAMAN UCAPAN (GESER KE BAWAH -> BOTOL) -->
+    <div class="page-screen" id="message-screen">
+        <div class="message-wrap">
+            <div class="glam-crown-row">👑 ✨ 🐚</div>
+            <div class="spiral-paper">
+                <div class="spiral-rings">
+                    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+                    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+                    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+                </div>
+                <p>
+                    Hari ini adalah tentang kamu. Tentang satu tahun lagi yang berhasil kamu lewati, tentang semua hal yang sudah kamu lalui, dan tentang semua hal baik yang masih menunggu di depan.<br><br>
+                    Semoga di umur yang baru ini, kamu selalu punya alasan untuk tersenyum dan selalu dikelilingi hal-hal yang membuat kamu bahagia.
+                </p>
+            </div>
+
+            <div class="sticker-row">
+                <span>👑</span>
+                <span>🦋</span>
+                <span>🐚</span>
+            </div>
+
+            <p class="swipe-down-note">↓ Geser ke bawah ↓</p>
+            <div style="margin-top: 12px;">
+                <button class="glam-btn" type="button" onclick="goToBottlePage()">Buka Botol ✨</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. HALAMAN BOTOL KACA TERPISAH -->
+    <div class="page-screen" id="bottle-screen">
+        <div class="hope-bottle-stage">
+            <div class="glam-crown-row">🐚 ✨ 💎</div>
+            <div class="glass-bottle-wrap" onclick="revealOrCycleHope()">
+                <div class="bottle-cork"></div>
+                <div class="bottle-neck"></div>
+                <div class="bottle-body">
+                    <div class="bottle-star-cluster" id="bottle-star-cluster"></div>
+                </div>
+            </div>
+
+            <p class="bottle-tap-hint" id="bottle-tap-hint">Tap botolnya ✨</p>
+
+            <div class="hope-popup-card" id="hope-popup-card">
+                <div class="hope-quote-label" id="hope-quote-label"></div>
+                <p class="hope-quote-text" id="hope-quote-text"></p>
+                <div class="hope-popup-actions">
+                    <button class="glam-btn" type="button" onclick="revealOrCycleHope()">Berikutnya ✨</button>
+                    <button class="glam-btn-outline" type="button" onclick="hideHopePopup()">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SECRET_CODE = "25-11-2007";
+        let enteredCode = "";
+
+        const passDisplay = document.getElementById("pass-display");
+        const passError = document.getElementById("pass-error");
+        const music = document.getElementById("bg-music");
+        const playBtn = document.getElementById("play-pause-btn");
+        const vinylCover = document.getElementById("vinyl-cover");
+        let isPlaying = false;
+        let giftOpened = false;
+        let cakeBlown = false;
+
+        // Banyak bintang di dalam botol kaca
+        const bottleCluster = document.getElementById("bottle-star-cluster");
+        const innerStarIcons = ["✦", "⭐", "✨", "✧", "🌟"];
+        for (let i = 0; i < 24; i++) {
+            const s = document.createElement("span");
+            s.className = "bottle-star-item";
+            s.textContent = innerStarIcons[i % innerStarIcons.length];
+            s.style.setProperty("--btop", `${(12 + Math.random() * 76).toFixed(0)}%`);
+            s.style.setProperty("--bleft", `${(10 + Math.random() * 78).toFixed(0)}%`);
+            s.style.setProperty("--bsize", `${(Math.random() * 9 + 11).toFixed(0)}px`);
+            s.style.setProperty("--bdur", `${(Math.random() * 2 + 1.8).toFixed(1)}s`);
+            s.style.setProperty("--bdelay", `${(Math.random() * 2.5).toFixed(1)}s`);
+            bottleCluster.appendChild(s);
+        }
+
+        const hopeQuotes = [
+            {
+                label: "Harapan #1",
+                text: "Semoga setiap langkahmu ke depan selalu dipenuhi keberuntungan, kesehatan, dan kabar baik yang membuat hatimu hangat."
+            },
+            {
+                label: "Harapan #2",
+                text: "Semoga semua lelah yang pernah kamu simpan pelan-pelan berganti menjadi kebahagiaan yang kamu syukuri setiap hari."
+            },
+            {
+                label: "Harapan #3",
+                text: "Seperti kilau bintang di atas laut biru, semoga harapanmu selalu punya cahaya jalan menuju kenyataan."
+            },
+            {
+                label: "Harapan #4",
+                text: "Semoga kamu selalu dikelilingi orang-orang yang tulus, rezeki yang lancar, dan hati yang selalu damai."
+            }
+        ];
+        let hopeIndex = -1;
+
+        function revealOrCycleHope() {
+            hopeIndex = (hopeIndex + 1) % hopeQuotes.length;
+            const q = hopeQuotes[hopeIndex];
+            document.getElementById("hope-quote-label").textContent = q.label;
+            document.getElementById("hope-quote-text").textContent = q.text;
+            document.getElementById("hope-popup-card").classList.add("revealed");
+            document.getElementById("bottle-tap-hint").style.display = "none";
+            spawnBurst(["✨", "⭐", "💎", "🐚"], 18);
+        }
+
+        function hideHopePopup() {
+            document.getElementById("hope-popup-card").classList.remove("revealed");
+            document.getElementById("bottle-tap-hint").style.display = "block";
+        }
+
+        // Kalender sobek otomatis dari bulan 1 sampai 11
+        const monthsData = [
+            { num: 1, name: "January",   days: 31, startDay: 4 },
+            { num: 2, name: "February",  days: 28, startDay: 0 },
+            { num: 3, name: "March",     days: 31, startDay: 0 },
+            { num: 4, name: "April",     days: 30, startDay: 3 },
+            { num: 5, name: "May",       days: 31, startDay: 5 },
+            { num: 6, name: "June",      days: 30, startDay: 1 },
+            { num: 7, name: "July",      days: 31, startDay: 3 },
+            { num: 8, name: "August",    days: 31, startDay: 6 },
+            { num: 9, name: "September", days: 30, startDay: 2 },
+            { num: 10, name: "October",  days: 31, startDay: 4 },
+            { num: 11, name: "November", days: 30, startDay: 0 }
+        ];
+
+        let autoTearTimer = null;
+        let autoTearRunning = false;
+
+        function renderTearCalendar(idx) {
+            const m = monthsData[idx];
+            const grid = document.getElementById("tear-calendar-grid");
+            document.getElementById("tear-month-name").textContent = m.name;
+
+            const dayNames = ["S", "M", "T", "W", "T", "F", "S"];
+            let html = dayNames.map(d => `<div class="day-name">${d}</div>`).join("");
+
+            for (let i = 0; i < m.startDay; i++) {
+                html += `<div class="date-cell"></div>`;
+            }
+
+            for (let d = 1; d <= m.days; d++) {
+                const isSpecial = (m.num === 11 && d === 25);
+                html += `<div class="date-cell ${isSpecial ? "special-date" : ""}">${d}</div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        renderTearCalendar(0);
+
+        function startAutoTearSequence() {
+            if (autoTearTimer) {
+                clearTimeout(autoTearTimer);
+                autoTearTimer = null;
+            }
+            autoTearRunning = true;
+            let idx = 0;
+            const page = document.getElementById("tear-page");
+            page.classList.remove("ripping");
+            renderTearCalendar(0);
+            document.getElementById("to-cake-btn").style.display = "none";
+
+            function stepTear() {
+                if (!autoTearRunning) return;
+                if (idx >= monthsData.length - 1) {
+                    autoTearRunning = false;
+                    document.getElementById("to-cake-btn").style.display = "inline-block";
+                    spawnBurst(["🎉", "✨", "💎", "👑"], 28);
+                    return;
+                }
+
+                page.classList.add("ripping");
+                autoTearTimer = setTimeout(() => {
+                    idx++;
+                    renderTearCalendar(idx);
+                    page.classList.remove("ripping");
+                    autoTearTimer = setTimeout(stepTear, 230);
+                }, 330);
+            }
+
+            autoTearTimer = setTimeout(stepTear, 450);
+        }
+
+        const starsLayer = document.getElementById("stars-layer");
+        for (let i = 0; i < 42; i++) {
+            const star = document.createElement("span");
+            star.className = "bg-star";
+            const size = (Math.random() * 2.8 + 1.4).toFixed(1);
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.top = `${(Math.random() * 96).toFixed(1)}%`;
+            star.style.left = `${(Math.random() * 98).toFixed(1)}%`;
+            star.style.setProperty("--dur", `${(Math.random() * 3 + 2.5).toFixed(1)}s`);
+            star.style.setProperty("--delay", `${(Math.random() * 4).toFixed(1)}s`);
+            starsLayer.appendChild(star);
+        }
+
+        const sparkSymbols = ["✦", "✧", "✨"];
+        for (let i = 0; i < 14; i++) {
+            const sp = document.createElement("span");
+            sp.className = "spark-glyph";
+            sp.textContent = sparkSymbols[i % sparkSymbols.length];
+            sp.style.top = `${(Math.random() * 94).toFixed(1)}%`;
+            sp.style.left = `${(Math.random() * 94).toFixed(1)}%`;
+            sp.style.setProperty("--ssize", `${(Math.random() * 10 + 14).toFixed(0)}px`);
+            sp.style.setProperty("--sdur", `${(Math.random() * 2.5 + 2.8).toFixed(1)}s`);
+            sp.style.setProperty("--sdelay", `${(Math.random() * 3.5).toFixed(1)}s`);
+            starsLayer.appendChild(sp);
+        }
+
+        function spawnBurst(items, count) {
+            const layer = document.getElementById("burst-layer");
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement("span");
+                el.className = "burst-particle";
+                el.textContent = items[Math.floor(Math.random() * items.length)];
+                el.style.left = `${centerX + (Math.random() * 70 - 35)}px`;
+                el.style.top = `${centerY + (Math.random() * 50 - 25)}px`;
+
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 110 + Math.random() * 260;
+                const tx = Math.cos(angle) * dist;
+                const ty = Math.sin(angle) * dist - 70;
+
+                el.style.setProperty("--tx", `${tx.toFixed(0)}px`);
+                el.style.setProperty("--ty", `${ty.toFixed(0)}px`);
+                el.style.setProperty("--rot", `${(Math.random() * 540 - 270).toFixed(0)}deg`);
+                el.style.setProperty("--psize", `${(Math.random() * 16 + 22).toFixed(0)}px`);
+                el.style.setProperty("--pdur", `${(Math.random() * 1.1 + 1.6).toFixed(2)}s`);
+
+                layer.appendChild(el);
+                setTimeout(() => el.remove(), 2900);
+            }
+        }
+
+        function updatePassDisplay() {
+            passDisplay.textContent = enteredCode.length === 0 ? "••••••••••" : enteredCode;
+            passDisplay.style.opacity = enteredCode.length === 0 ? "0.7" : "1";
+        }
+
+        function pressKey(char) {
+            if (enteredCode.length >= 10) return;
+            enteredCode += char;
+            passError.textContent = "";
+            updatePassDisplay();
+
+            if (enteredCode.length === SECRET_CODE.length) {
+                if (enteredCode === SECRET_CODE) {
+                    setTimeout(() => {
+                        document.getElementById("passcode-screen").classList.add("hidden");
+                    }, 350);
+                } else {
+                    passError.textContent = "Kode salah, coba lagi ya ✨";
+                    passDisplay.classList.add("shake");
+                    setTimeout(() => {
+                        passDisplay.classList.remove("shake");
+                        enteredCode = "";
+                        updatePassDisplay();
+                    }, 550);
+                }
+            }
+        }
+
+        function deleteKey() {
+            enteredCode = enteredCode.slice(0, -1);
+            passError.textContent = "";
+            updatePassDisplay();
+        }
+
+        function openGiftBox() {
+            if (giftOpened) return;
+            giftOpened = true;
+            document.getElementById("gift-box").classList.add("opened");
+            spawnBurst(["🌸", "🌷", "💐", "✨", "🦋", "💎"], 60);
+            setTimeout(() => spawnBurst(["🌸", "💐", "✨", "🐚"], 35), 350);
+
+            setTimeout(() => {
+                document.getElementById("gift-screen").classList.add("hidden");
+            }, 2200);
+        }
+
+        function goToEnvelope() {
+            document.getElementById("greeting-screen").classList.add("hidden");
+        }
+
+        function openCalendarPage() {
+            document.getElementById("envelope-screen").classList.add("hidden");
+            if (!isPlaying) {
+                music.play().then(() => {
+                    isPlaying = true;
+                    playBtn.textContent = "⏸";
+                    vinylCover.classList.add("spinning");
+                }).catch(() => {});
+            }
+            setTimeout(() => {
+                startAutoTearSequence();
+            }, 400);
+        }
+
+        function goToCakePage() {
+            document.getElementById("calendar-screen").classList.add("hidden");
+        }
+
+        function blowCakeCandle() {
+            if (cakeBlown) return;
+            cakeBlown = true;
+            document.getElementById("cake-flame").classList.add("out");
+            document.getElementById("cake-smoke").classList.add("rising");
+            spawnBurst(["✨", "🎉", "💎", "🦋"], 28);
+
+            setTimeout(() => {
+                document.getElementById("cake-screen").classList.add("hidden");
+            }, 1300);
+        }
+
+        function triggerPhotoSurprise() {
+            const cam = document.getElementById("camera-frame-box");
+            const cap = document.getElementById("surprise-caption");
+            cam.classList.add("surprise-active");
+            cap.textContent = "SURPRISE!! 🎉✨👑";
+            spawnBurst(["🎉", "🎉", "✨", "💎", "👑", "🦋"], 55);
+
+            setTimeout(() => {
+                cam.classList.remove("surprise-active");
+            }, 1400);
+        }
+
+        function goToMessagePage() {
+            document.getElementById("photo-screen").classList.add("hidden");
+        }
+
+        function goToBottlePage() {
+            document.getElementById("message-screen").classList.add("hidden");
+        }
+
+        function toggleMusic() {
+            if (isPlaying) {
+                music.pause();
+                playBtn.textContent = "▶";
+                vinylCover.classList.remove("spinning");
+            } else {
+                music.play();
+                playBtn.textContent = "⏸";
+                vinylCover.classList.add("spinning");
+            }
+            isPlaying = !isPlaying;
+        }
+    </script>
+</body>
+</html>
